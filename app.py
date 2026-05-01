@@ -11,7 +11,7 @@ st.set_page_config(
 )
 
 # ── CSS ───────────────────────────────────────────────────────────────────────
-```python
+
 import streamlit as st
 import pickle
 import numpy as np
