@@ -11,184 +11,174 @@ st.set_page_config(
 )
 
 # ── CSS ───────────────────────────────────────────────────────────────────────
+```python
+import streamlit as st
+import pickle
+import numpy as np
+import pandas as pd
+
+# ── Page Config ───────────────────────────────────────────────────────────────
+st.set_page_config(
+    page_title="ChurnSense · Customer Loyalty Predictor",
+    page_icon="✈️",
+    layout="centered",
+)
+
+# ── NEW UI CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
 
 :root {
-    --bg:      #0d0f14;
-    --surface: #151820;
-    --card:    #1c2030;
-    --border:  #2a2f42;
-    --accent:  #4f8ef7;
-    --accent2: #7c5cfc;
-    --text:    #e8eaf2;
-    --muted:   #7a80a0;
-    --green:   #34d399;
-    --red:     #f87171;
-    --radius:  14px;
+    --bg: linear-gradient(135deg, #0f172a, #020617);
+    --glass: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.08);
+    --accent: #6366f1;
+    --accent2: #22d3ee;
+    --text: #e5e7eb;
+    --muted: #94a3b8;
+    --green: #22c55e;
+    --red: #ef4444;
+    --radius: 16px;
 }
 
 html, body, [data-testid="stAppViewContainer"] {
-    background: var(--bg) !important;
-    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    font-family: 'Inter', sans-serif;
     color: var(--text);
 }
-[data-testid="stHeader"]  { background: transparent !important; }
-[data-testid="stToolbar"] { display: none !important; }
-#MainMenu, footer         { visibility: hidden !important; }
+
+[data-testid="stHeader"], footer, #MainMenu {
+    visibility: hidden;
+}
 
 .block-container {
-    max-width: 700px !important;
-    padding: 2rem 1.8rem 4rem !important;
+    max-width: 750px !important;
+    padding-top: 2rem;
 }
 
-/* ── Hero ── */
+/* Hero */
 .hero {
     text-align: center;
-    padding: 2.4rem 0 1.6rem;
-}
-.hero-badge {
-    display: inline-block;
-    background: linear-gradient(135deg, rgba(79,142,247,.14), rgba(124,92,252,.14));
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    padding: 6px 20px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: .13em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 1.1rem;
+    margin-bottom: 1.5rem;
 }
 .hero h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: 2.5rem;
-    font-weight: 800;
-    line-height: 1.13;
-    background: linear-gradient(135deg, #ffffff 25%, var(--accent));
+    font-size: 2.7rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, #fff, var(--accent2));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin: 0 0 .55rem;
 }
 .hero p {
     color: var(--muted);
-    font-size: .95rem;
-    line-height: 1.65;
-    margin: 0;
+    font-size: 0.95rem;
 }
 
-/* ── Stats strip ── */
+/* Stats */
 .stats-strip {
     display: flex;
-    gap: .75rem;
-    margin: 1.6rem 0 .4rem;
+    gap: 10px;
+    margin: 1.5rem 0;
 }
 .stat-box {
     flex: 1;
-    background: var(--card);
+    backdrop-filter: blur(12px);
+    background: var(--glass);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: .9rem 1rem;
+    padding: 1rem;
     text-align: center;
 }
 .stat-val {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.45rem;
-    font-weight: 800;
-    color: var(--accent);
-    line-height: 1;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent2);
 }
 .stat-lbl {
-    font-size: .7rem;
+    font-size: 0.7rem;
     color: var(--muted);
-    margin-top: 4px;
-    letter-spacing: .06em;
-    text-transform: uppercase;
 }
 
-/* ── Section headers ── */
+/* Section headers */
 .sec-header {
-    font-size: .68rem;
-    font-weight: 600;
-    letter-spacing: .15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin: 1.9rem 0 .85rem;
-    display: flex;
-    align-items: center;
-    gap: 9px;
-}
-.sec-header::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
+    color: var(--accent2);
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    margin-top: 2rem;
+    margin-bottom: 0.6rem;
 }
 
-/* ── Widget overrides ── */
-div[data-testid="stNumberInput"] > div,
-div[data-testid="stSelectbox"]   > div {
-    background: var(--surface) !important;
+/* Inputs */
+div[data-testid="stNumberInput"], 
+div[data-testid="stSelectbox"] {
+    backdrop-filter: blur(10px);
+    background: var(--glass) !important;
     border: 1px solid var(--border) !important;
-    border-radius: 10px !important;
-}
-div[data-testid="stNumberInput"] input { color: var(--text) !important; background: transparent !important; }
-label { font-size: .83rem !important; font-weight: 500 !important; color: var(--muted) !important; }
-
-/* ── Predict button ── */
-div[data-testid="stButton"] > button {
-    width: 100%;
-    padding: .88rem !important;
-    font-family: 'DM Sans', sans-serif !important;
-    font-size: 1rem !important;
-    font-weight: 600 !important;
-    letter-spacing: .05em;
-    background: linear-gradient(135deg, var(--accent), var(--accent2)) !important;
-    color: #fff !important;
-    border: none !important;
     border-radius: 12px !important;
-    margin-top: .6rem;
-    transition: opacity .2s;
+    padding: 6px;
 }
-div[data-testid="stButton"] > button:hover { opacity: .85; }
+input {
+    color: white !important;
+}
 
-/* ── Result cards ── */
+/* Button */
+.stButton button {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 14px;
+    border: none;
+    padding: 0.9rem;
+    font-weight: 600;
+    font-size: 1rem;
+    color: white;
+    transition: 0.3s;
+}
+.stButton button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(99,102,241,0.3);
+}
+
+/* Result */
 .res-card {
+    backdrop-filter: blur(14px);
+    background: var(--glass);
     border-radius: var(--radius);
-    padding: 1.5rem 1.8rem;
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    margin-top: 1.5rem;
     display: flex;
-    align-items: flex-start;
-    gap: 1.1rem;
-    margin-top: 1.6rem;
-    animation: pop .35s cubic-bezier(.22,1,.36,1);
+    gap: 15px;
 }
-@keyframes pop { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+.res-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+.res-sub {
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+.res-stay { border-left: 4px solid var(--green); }
+.res-churn { border-left: 4px solid var(--red); }
 
-.res-stay  { background: linear-gradient(135deg,rgba(52,211,153,.09),rgba(52,211,153,.03)); border:1px solid rgba(52,211,153,.3); }
-.res-churn { background: linear-gradient(135deg,rgba(248,113,113,.09),rgba(248,113,113,.03)); border:1px solid rgba(248,113,113,.3); }
+/* Progress bar */
+.conf-bar-bg {
+    background: rgba(255,255,255,0.08);
+    height: 8px;
+    border-radius: 100px;
+    overflow: hidden;
+}
+.conf-bar-fill {
+    height: 8px;
+    border-radius: 100px;
+}
 
-.res-icon  { font-size: 2.5rem; line-height: 1; flex-shrink: 0; margin-top: 2px; }
-.res-title { font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:700; margin-bottom:6px; }
-.res-sub   { font-size:.85rem; color:var(--muted); line-height:1.6; }
-.res-stay  .res-title { color:var(--green); }
-.res-churn .res-title { color:var(--red); }
-
-/* ── Confidence meter ── */
-.conf-wrap { margin-top: 1.1rem; }
-.conf-label { font-size:.75rem; color:var(--muted); margin-bottom:5px; }
-.conf-bar-bg { background:var(--border); border-radius:100px; height:8px; overflow:hidden; }
-.conf-bar-fill { height:8px; border-radius:100px; transition:width .6s ease; }
-.conf-pct { font-family:'Syne',sans-serif; font-size:.9rem; font-weight:700; margin-top:5px; }
-
-/* ── Divider ── */
-.divider { border:none; border-top:1px solid var(--border); margin:2.2rem 0; }
-
-/* ── Footer ── */
-.app-footer { text-align:center; font-size:.73rem; color:var(--muted); padding-top:1.5rem; }
+/* Footer */
+.app-footer {
+    color: var(--muted);
+    text-align: center;
+    font-size: 0.7rem;
+}
 </style>
 """, unsafe_allow_html=True)
-
 
 # ── Load model ────────────────────────────────────────────────────────────────
 @st.cache_resource
@@ -197,6 +187,100 @@ def load_model():
         return pickle.load(f)
 
 model = load_model()
+
+# ── Hero ──────────────────────────────────────────────────────────────────────
+st.markdown("""
+<div class="hero">
+    <h1>Customer Churn Predictor</h1>
+    <p>Predict whether a customer will stay or churn using AI</p>
+</div>
+""", unsafe_allow_html=True)
+
+# Stats strip
+st.markdown("""
+<div class="stats-strip">
+    <div class="stat-box"><div class="stat-val">88%</div><div class="stat-lbl">Accuracy</div></div>
+    <div class="stat-box"><div class="stat-val">953</div><div class="stat-lbl">Records</div></div>
+    <div class="stat-box"><div class="stat-val">6</div><div class="stat-lbl">Features</div></div>
+    <div class="stat-box"><div class="stat-val">100</div><div class="stat-lbl">Trees</div></div>
+</div>
+""", unsafe_allow_html=True)
+
+# Inputs
+st.markdown('<div class="sec-header">PERSONAL INFO</div>', unsafe_allow_html=True)
+
+c1, c2 = st.columns(2)
+with c1:
+    Age = st.number_input("Age", 18, 100, 30)
+with c2:
+    AnnualIncomeClass = st.selectbox("Income", ["Low Income", "Middle Income", "High Income"])
+
+st.markdown('<div class="sec-header">TRAVEL</div>', unsafe_allow_html=True)
+
+c3, c4 = st.columns(2)
+with c3:
+    FrequentFlyer = st.selectbox("Frequent Flyer", ["No", "Yes"])
+with c4:
+    ServicesOpted = st.number_input("Services (1-10)", 1, 10, 3)
+
+st.markdown('<div class="sec-header">ENGAGEMENT</div>', unsafe_allow_html=True)
+
+c5, c6 = st.columns(2)
+with c5:
+    AccountSyncedToSocialMedia = st.selectbox("Social Sync", ["No", "Yes"])
+with c6:
+    BookedHotelOrNot = st.selectbox("Booked Hotel", ["No", "Yes"])
+
+# Predict
+predict = st.button("Predict Churn")
+
+if predict:
+    ff  = 1 if FrequentFlyer == "Yes" else 0
+    asm = 1 if AccountSyncedToSocialMedia == "Yes" else 0
+    bh  = 1 if BookedHotelOrNot == "Yes" else 0
+    inc = {"Low Income": 0, "Middle Income": 1, "High Income": 2}[AnnualIncomeClass]
+
+    features = np.array([[Age, ff, inc, ServicesOpted, asm, bh]])
+    pred     = model.predict(features)[0]
+    proba    = model.predict_proba(features)[0]
+
+    if pred == 1:
+        pct = int(proba[1] * 100)
+        st.markdown(f"""
+        <div class="res-card res-churn">
+            <div>
+                <div class="res-title">⚠️ High Churn Risk</div>
+                <div class="res-sub">Customer likely to leave. Take action.</div>
+                <div class="conf-bar-bg">
+                    <div class="conf-bar-fill" style="width:{pct}%;background:#ef4444;"></div>
+                </div>
+                <b>{pct}%</b>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        pct = int(proba[0] * 100)
+        st.markdown(f"""
+        <div class="res-card res-stay">
+            <div>
+                <div class="res-title">✅ Customer Will Stay</div>
+                <div class="res-sub">Strong loyalty detected.</div>
+                <div class="conf-bar-bg">
+                    <div class="conf-bar-fill" style="width:{pct}%;background:#22c55e;"></div>
+                </div>
+                <b>{pct}%</b>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+# Footer
+st.markdown("""
+<div class="app-footer">
+    ChurnSense · AI Project · Streamlit App
+</div>
+""", unsafe_allow_html=True)
+```
+
 
 
 # ── Hero ──────────────────────────────────────────────────────────────────────
